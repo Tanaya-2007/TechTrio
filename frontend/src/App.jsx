@@ -26,17 +26,17 @@ export default function App() {
   const [progress,     setProgress]     = useState(0);
   const rawFile = useRef(null);
 
-  /* ── Parse CSV ─────────────────────────────────────── */
   const parseCSV = (text) => {
     const vals = [];
-    for (const line of text.trim().split("\n")) {
-      const v = parseFloat(line.split(",")[0]);
-      if (!isNaN(v)) vals.push(v);
+    const allVals = text.trim().split(/[\n,]+/);
+    for (const v of allVals) {
+      const num = parseFloat(v.trim());
+      if (!isNaN(num)) vals.push(num);
     }
     return vals.slice(0, 500);
   };
 
-  /* ── Load file ─────────────────────────────────────── */
+
   const handleFile = (file) => {
     if (!file) return;
     if (!file.name.endsWith(".csv")) { alert("Please upload a CSV file only."); return; }
@@ -52,8 +52,7 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  /* ── Run analysis ──────────────────────────────────── */
-  const analyzeECG = async () => {
+   const analyzeECG = async () => {
     setLoading(true); setProgress(0);
     const iv = setInterval(() => setProgress(p => p < 88 ? p + 9 : p), 250);
     try {
@@ -85,7 +84,6 @@ export default function App() {
     setAnomalyRange(null); setFileName(""); setProgress(0);
   };
 
-  /* ── Chart data ────────────────────────────────────── */
   const buildChart = () => {
     const cfg       = result ? RESULT_CONFIG[result.prediction] : null;
     const lineColor = cfg ? cfg.color : "#818cf8";
