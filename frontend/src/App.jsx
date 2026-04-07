@@ -62,6 +62,11 @@ export default function App() {
       const json = await res.json();
       clearInterval(iv); setProgress(100);
       setTimeout(() => {
+        if (json.error) {
+          alert("Backend Error: " + json.error);
+          setLoading(false);
+          return;
+        }
         setResult(json);
         setAnomalyRange(json.anomaly_range || [Math.floor(ecgData.length * 0.35), Math.floor(ecgData.length * 0.6)]);
         setLoading(false); setScreen("result");

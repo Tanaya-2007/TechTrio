@@ -58,9 +58,29 @@ def parse_csv_signal(file):
     1. Single row, single column with JSON string: '[0.03, 0.04, ...]'
     2. Multiple rows, single numeric column
     3. Single row, multiple columns
+    4. Header 'signal' with string array
     """
     content = file.read().decode("utf-8")
     file.seek(0)
+    
+    # Try reading it via pandas to handle 'signal' header natively
+    try:
+        df = pd.read_csv(pd.io.common.StringIO(content))
+        if "signal" in df.columns:
+            val = df["signal"].dropna().iloc[0]
+            s = str(val).strip()
+            if s.startswith("["):
+                s = s.rstrip(", ")
+                if not s.endswith("]"):
+                    s += "]"
+                return np.array(ast.literal_eval(s), dtype=float)
+            else:
+                col = df["signal"].dropna().values.astype(float)
+                if len(col) >= 50:
+                    return col
+    except:
+        pass
+
     lines = content.strip().split("\n")
     if len(lines) >= 1:
         first = lines[0].strip().strip('"')
